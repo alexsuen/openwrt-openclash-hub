@@ -1,25 +1,8 @@
-port: 7890
-socks-port: 7891
-redir-port: 7892
-allow-lan: true
-mode: rule
-log-level: info
-external-controller: 0.0.0.0:9090
-secret: ''
 
 # ==========================================
 # 2. 机场节点代理集（完全原样保留）
 # ==========================================
-proxy-providers:
-  Provider_53B372:
-    type: http
-    url: "https://123456O"
-    interval: 3600
-    path: "./proxy_provider/Provider_123456.yaml"
-    health-check:
-      enable: true
-      url: http://cp.cloudflare.com
-      interval: 300
+
 
 # ==========================================
 # 3. 策略组（修复全部空悬与嵌套，直挂订阅落地）
