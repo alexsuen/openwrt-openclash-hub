@@ -1,0 +1,938 @@
+port: 7890
+socks-port: 7891
+redir-port: 7892
+allow-lan: true
+mode: rule
+log-level: info
+external-controller: 0.0.0.0:9090
+secret: ''
+
+# ==========================================
+# 2. 机场节点代理集（完全原样保留）
+# ==========================================
+proxy-providers:
+  Provider_53B372:
+    type: http
+    url: "https://123456O"
+    interval: 3600
+    path: "./proxy_provider/Provider_123456.yaml"
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com
+      interval: 300
+
+# ==========================================
+# 3. 策略组（修复全部空悬与嵌套，直挂订阅落地）
+# ==========================================
+proxy-groups:
+  # --- 核心调度与总控组 ---
+  - name: 🚀 手动选择
+    type: select
+    use:
+      - Provider_53B372
+    filter: "^(?!.*(公告|官网|提示|到期|剩余|有效|群|通知)).*$"
+    proxies:
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇹🇼 台湾节点
+      - 🇸🇬 新加坡节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🇹🇭 泰国节点
+      - 🇵🇭 菲律宾节点
+      - 🇮🇩 印尼节点
+      - 🇻🇳 越南节点
+      - 🇮🇳 印度节点
+      - 🇬🇧 英国节点
+      - 🇩🇪 德国节点
+      - 🇫🇷 法国节点
+      - 🇳🇱 荷兰节点
+      - 🇹🇷 土耳其节点
+      - 🇨🇦 加拿大节点
+      - 🇦🇺 澳大利亚节点
+
+  - name: ♻️ 自动选择
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "^(?!.*(公告|官网|提示|到期|剩余|有效|群|通知)).*$"
+    use:
+      - Provider_53B372
+
+  # 南洋节点自动测速优选组（美、新、马）
+  - name: 🌏 南洋节点
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|纽约|亚特兰大|迈阿密|华盛顿|United States|USA|\\bUS\\b|🇸🇬|新加坡|狮城|Singapore|\\bSG\\b|\\bSGP\\b|🇲🇾|马来西亚|大马|吉隆坡|Malaysia|\\bMY\\b|\\bMYS\\b"
+    use:
+      - Provider_53B372
+
+  # --- 服务策略组 ---
+  - name: 🤖 ChatGPT
+    type: select
+    proxies:
+      - 🌏 南洋节点
+      - 🇺🇸 美国节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇯🇵 日本节点
+      - 🇹🇼 台湾节点
+      - 🇰🇷 韩国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🎯 全球直连
+
+  - name: 🤖 AI服务
+    type: select
+    proxies:
+      - 🌏 南洋节点
+      - 🇺🇸 美国节点
+      - 🇸🇬 新加坡节点
+      - 🇲🇾 马来西亚节点
+      - 🇯🇵 日本节点
+      - 🇹🇼 台湾节点
+      - 🇰🇷 韩国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🎯 全球直连
+
+  - name: 💬 即时通讯
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🎯 全球直连
+
+  - name: 🌐 社交媒体
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 🚀 GitHub
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🎯 全球直连
+
+  - name: 🎶 TikTok
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇰🇷 韩国节点
+      - 🇺🇸 美国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 📹 YouTube
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 🎬 国外主流视频
+    type: select
+    proxies:
+      - 🌏 南洋节点
+      - 🇸🇬 新加坡节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🎯 全球直连
+
+  - name: 🎥 AppleTV+
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇺🇸 美国节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 🎻 Spotify
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🎯 全球直连
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇵🇭 菲律宾节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: 📺 Bahamut
+    type: select
+    proxies:
+      - 🇹🇼 台湾节点
+      - 🇭🇰 香港节点
+      - 🚀 手动选择
+      - 🎯 全球直连
+
+  - name: 🌎 国外媒体
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  # --- 独立跨境电商运营组 ---
+  - name: 🟠 虾皮电商
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇵🇭|菲律宾|🇲🇾|马来西亚|🇸🇬|新加坡|🇹🇭|泰国|🇮🇩|印尼|🇻🇳|越南"
+    proxies:
+      - ⚡ 菲律宾自动
+      - ⚡ 马来西亚自动
+      - ⚡ 新加坡自动
+      - ⚡ 泰国自动
+      - ⚡ 印尼自动
+      - ⚡ 越南自动
+      - 🎯 全球直连
+
+  - name: 📦 Amazon
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇺🇸|美国|🇯🇵|日本|🇬🇧|英国|🇩🇪|德国|🇭🇰|香港|\\bHK\\b|Hong Kong"
+    proxies:
+      - ⚡ 香港自动
+      - 🇭🇰 香港节点
+      - 🌏 南洋节点
+      - ⚡ 美国自动
+      - ⚡ 日本自动
+      - ⚡ 英国自动
+      - ⚡ 德国自动
+      - 🎯 全球直连
+
+  - name: 🛒 国外电商
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🎯 全球直连
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  # --- 专属金融与电子钱包 ---
+  - name: 🏦 金融银行
+    type: select
+    use:
+      - Provider_53B372
+    filter: "^(?!.*(公告|官网|提示|到期|剩余|有效|群|通知)).*$"
+    proxies:
+      - 🎯 全球直连
+      - 🌏 南洋节点
+      - ⚡ 美国自动
+      - ⚡ 香港自动
+      - ⚡ 新加坡自动
+      - ⚡ 菲律宾自动
+      - ⚡ 英国自动
+      - ⚡ 日本自动
+
+  - name: 📢 谷歌FCM
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🎯 全球直连
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+
+  - name: 🇬 谷歌服务
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 🍎 苹果服务
+    type: select
+    proxies:
+      - 🎯 全球直连
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: Ⓜ️ 微软服务
+    type: select
+    proxies:
+      - 🎯 全球直连
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: 🎮 游戏平台
+    type: select
+    proxies:
+      - 🎯 全球直连
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: 🎮 Steam
+    type: select
+    proxies:
+      - 🎯 全球直连
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: 🚀 测速工具
+    type: select
+    proxies:
+      - 🎯 全球直连
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+      - 🚀 手动选择
+      - ♻️ 自动选择
+      - 🌏 南洋节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🇹🇼 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🇲🇾 马来西亚节点
+      - 🌏 亚洲地区
+      - 🇪🇺 欧洲地区
+      - 🌎 美洲地区
+      - 🎯 全球直连
+
+  - name: 🔀 非标端口
+    type: select
+    proxies:
+      - 🐟 漏网之鱼
+      - 🎯 全球直连
+
+  # --- ★ 广告拦截策略组（位于漏网之鱼下方，已移除 hidden 确保 YACD 正常显示） ---
+  - name: 🛑 广告拦截
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+  # --- 大区测速分流组（已彻底剔除英国相关所有中英文字符与正则） ---
+  - name: 🌏 亚洲地区
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇭🇰|港|HK|Hong Kong|Hongkong|深港|九龙|🇹🇼|🇼🇸|台|TW|Taiwan|新北|彰化|🇯🇵|日本|川日|东京|大阪|泉日|埼玉|沪日|深日|JP|Japan|关西|🇰🇷|KR|Korea|首尔|韩|春川|🇸🇬|新加坡|坡|狮城|SG|Singapore|🇲🇾|马来西亚|大马|吉隆坡|MY|Malaysia|🇹🇭|泰国|曼谷|TH|Thailand|🇵🇭|菲律宾|马尼拉|PH|Philippines|🇻🇳|越南|河内|胡志明|VN|Vietnam|🇮🇩|印尼|印度尼西亚|雅加达|ID|Indonesia|🇮🇳|印度|孟买|德里|IN|India"
+    use:
+      - Provider_53B372
+
+  - name: 🇪🇺 欧洲地区
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇬🇧|英国|伦敦|United Kingdom|Great Britain|\\bUK\\b|\\bGB\\b|🇩🇪|德国|法兰克福|柏林|Germany|\\bDE\\b|\\bDEU\\b|🇫🇷|法国|巴黎|France|\\bFR\\b|\\bFRA\\b|🇳🇱|荷兰|阿姆斯特丹|Netherlands|\\bNL\\b|\\bNLD\\b|🇹🇷|土耳其|伊斯坦布尔|Turkey|\\bTR\\b|\\bTUR\\b|🇮🇹|意大利|米兰|罗马|Italy|\\bIT\\b|🇪🇸|西班牙|马德里|Spain|\\bES\\b|🇨🇭|瑞士|苏黎世|Switzerland|\\bCH\\b|🇸🇪|瑞典|斯德哥尔摩|Sweden|\\bSE\\b|🇮🇪|爱尔兰|都柏林|Ireland|\\bIE\\b|波兰|华沙|Poland"
+    use:
+      - Provider_53B372
+
+  - name: 🌎 美洲地区
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|纽约|亚特兰大|迈阿密|华盛顿|United States|USA|\\bUS\\b|🇬🇺|关岛|Guam|\\bGU\\b|🇨🇦|加拿大|温哥华|多伦多|蒙特利尔|Canada|\\bCA\\b|\\bCAN\\b|🇲🇽|墨西哥|Mexico|\\bMX\\b|🇧🇷|巴西|圣保罗|Brazil|\\bBR\\b|🇦🇷|阿根廷|布宜诺斯艾利斯|Argentina|\\bAR\\b|智利|Chile"
+    use:
+      - Provider_53B372
+
+  # --- 各国专属节点组 ---
+  - name: ⚡ 香港自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇭🇰|港|\\bHK(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|hk|Hong Kong|Hongkong|Hong kong|HongKong|hongkong|HONG KONG|HONGKONG|深港|HKG|九龙|Kowloon|新界|沙田|荃湾|葵涌"
+    use:
+      - Provider_53B372
+
+  - name: 🇭🇰 香港节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇭🇰|港|\\bHK(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|hk|Hong Kong|Hongkong|Hong kong|HongKong|hongkong|HONG KONG|HONGKONG|深港|HKG|九龙|Kowloon|新界|沙田|荃湾|葵涌"
+    proxies:
+      - ⚡ 香港自动
+
+  - name: ⚡ 日本自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇯🇵|日本|川日|东京|大阪|泉日|埼玉|沪日|深日|(?<!尼|-)日|\\bJP(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Japan|JAPAN|JPN|NRT|HND|KIX|TYO|OSA|关西|Kansai|KANSAI"
+    use:
+      - Provider_53B372
+
+  - name: 🇯🇵 日本节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇯🇵|日本|川日|东京|大阪|泉日|埼玉|沪日|深日|(?<!尼|-)日|\\bJP(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Japan|JAPAN|JPN|NRT|HND|KIX|TYO|OSA|关西|Kansai|KANSAI"
+    proxies:
+      - ⚡ 日本自动
+
+  - name: ⚡ 台湾自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇹🇼|🇼🇸|台|新北|彰化|\\bTW(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Taiwan|TAIWAN|TWN|TPE|ROC"
+    use:
+      - Provider_53B372
+
+  - name: 🇹🇼 台湾节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇹🇼|🇼🇸|台|新北|彰化|\\bTW(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Taiwan|TAIWAN|TWN|TPE|ROC"
+    proxies:
+      - ⚡ 台湾自动
+
+  - name: ⚡ 新加坡自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇸🇬|新加坡|坡|狮城|\\bSG(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Singapore|SINGAPORE|SIN"
+    use:
+      - Provider_53B372
+
+  - name: 🇸🇬 新加坡节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇸🇬|新加坡|坡|狮城|\\bSG(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Singapore|SINGAPORE|SIN"
+    proxies:
+      - ⚡ 新加坡自动
+
+  - name: ⚡ 韩国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇰🇷|\\bKR(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Korea|KOREA|KOR|首尔|韩|韓|春川|Chuncheon|ICN"
+    use:
+      - Provider_53B372
+
+  - name: 🇰🇷 韩国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇰🇷|\\bKR(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|Korea|KOREA|KOR|首尔|韩|韓|春川|Chuncheon|ICN"
+    proxies:
+      - ⚡ 韩国自动
+
+  - name: ⚡ 美国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|纽约|亚特兰大|迈阿密|华盛顿|\\bUS(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|United States|UnitedStates|UNITED STATES|USA|JFK|EWR|IAD|ATL|ORD|MIA|NYC|LAX|SFO|SEA|DFW|SJC"
+    use:
+      - Provider_53B372
+
+  - name: 🇺🇸 美国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|纽约|亚特兰大|迈阿密|华盛顿|\\bUS(?:[-_ ]?\\d+(?:[-_ ]?[A-Za-z]{2,})?)?\\b|United States|UnitedStates|UNITED STATES|USA|JFK|EWR|IAD|ATL|ORD|MIA|NYC|LAX|SFO|SEA|DFW|SJC"
+    proxies:
+      - ⚡ 美国自动
+
+  - name: 🇨🇦 加拿大节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇨🇦|加拿大|温哥华|多伦多|蒙特利尔|Canada|\\bCA\\b|\\bCAN\\b"
+    proxies:
+      - ⚡ 加拿大自动
+
+  - name: ⚡ 加拿大自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇨🇦|加拿大|温哥华|多伦多|蒙特利尔|Canada|\\bCA\\b|\\bCAN\\b"
+    use:
+      - Provider_53B372
+
+  - name: ⚡ 英国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇬🇧|英国|伦敦|United Kingdom|Great Britain|\\bUK\\b|\\bGB\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇬🇧 英国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇬🇧|英国|伦敦|United Kingdom|Great Britain|\\bUK\\b|\\bGB\\b"
+    proxies:
+      - ⚡ 英国自动
+
+  - name: ⚡ 德国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇩🇪|德国|法兰克福|柏林|Germany|\\bDE\\b|\\bDEU\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇩🇪 德国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇩🇪|德国|法兰克福|柏林|Germany|\\bDE\\b|\\bDEU\\b"
+    proxies:
+      - ⚡ 德国自动
+
+  - name: ⚡ 法国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇫🇷|法国|巴黎|France|\\bFR\\b|\\bFRA\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇫🇷 法国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇫🇷|法国|巴黎|France|\\bFR\\b|\\bFRA\\b"
+    proxies:
+      - ⚡ 法国自动
+
+  - name: ⚡ 荷兰自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇳🇱|荷兰|阿姆斯特丹|Netherlands|\\bNL\\b|\\bNLD\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇳🇱 荷兰节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇳🇱|荷兰|阿姆斯特丹|Netherlands|\\bNL\\b|\\bNLD\\b"
+    proxies:
+      - ⚡ 荷兰自动
+
+  - name: ⚡ 土耳其自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇹🇷|土耳其|伊斯坦布尔|Turkey|\\bTR\\b|\\bTUR\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇹🇷 土耳其节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇹🇷|土耳其|伊斯坦布尔|Turkey|\\bTR\\b|\\bTUR\\b"
+    proxies:
+      - ⚡ 土耳其自动
+
+  - name: ⚡ 马来西亚自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇲🇾|马来西亚|大马|吉隆坡|Malaysia|\\bMY\\b|\\bMYS\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇲🇾 马来西亚节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇲🇾|马来西亚|大马|吉隆坡|Malaysia|\\bMY\\b|\\bMYS\\b"
+    proxies:
+      - ⚡ 马来西亚自动
+
+  - name: ⚡ 泰国自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇹🇭|泰国|曼谷|Thailand|\\bTH\\b|\\bTHA\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇹🇭 泰国节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇹🇭|泰国|曼谷|Thailand|\\bTH\\b|\\bTHA\\b"
+    proxies:
+      - ⚡ 泰国自动
+
+  - name: ⚡ 菲律宾自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇵🇭|菲律宾|马尼拉|Philippines|\\bPH\\b|\\bPHL\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇵🇭 菲律宾节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇵🇭|菲律宾|马尼拉|Philippines|\\bPH\\b|\\bPHL\\b"
+    proxies:
+      - ⚡ 菲律宾自动
+
+  - name: ⚡ 印尼自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇮🇩|印尼|印度尼西亚|雅加达|Indonesia|\\bID\\b|\\bIDN\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇮🇩 印尼节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇮🇩|印尼|印度尼西亚|雅加达|Indonesia|\\bID\\b|\\bIDN\\b"
+    proxies:
+      - ⚡ 印尼自动
+
+  - name: ⚡ 越南自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇻🇳|越南|河内|胡志明|Vietnam|\\bVN\\b|\\bVNM\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇻🇳 越南节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇻🇳|越南|河内|胡志明|Vietnam|\\bVN\\b|\\bVNM\\b"
+    proxies:
+      - ⚡ 越南自动
+
+  - name: ⚡ 澳大利亚自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇦🇺|澳大利亚|悉尼|墨尔本|Australia|\\bAU\\b|\\bAUS\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇦🇺 澳大利亚节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇦🇺|澳大利亚|悉尼|墨尔本|Australia|\\bAU\\b|\\bAUS\\b"
+    proxies:
+      - ⚡ 澳大利亚自动
+
+  - name: ⚡ 印度自动
+    type: url-test
+    url: http://cp.cloudflare.com
+    interval: 300
+    tolerance: 50
+    filter: "(?i)🇮🇳|印度|孟买|德里|India|\\bIN\\b|\\bIND\\b"
+    use:
+      - Provider_53B372
+
+  - name: 🇮🇳 印度节点
+    type: select
+    use:
+      - Provider_53B372
+    filter: "(?i)🇮🇳|印度|孟买|德里|India|\\bIN\\b|\\bIND\\b"
+    proxies:
+      - ⚡ 印度自动
+
+  # 全球直连基石
+  - name: 🎯 全球直连
+    type: select
+    proxies:
+      - DIRECT
+
+# ==========================================
+# 4. 分流规则（严密排序，确保前置截流）
+# ==========================================
+rules:
+
+  # 本地地址和域名直连
+  - GEOSITE,private,🎯 全球直连
+  - GEOIP,private,🎯 全球直连,no-resolve
+
+  # AI 专属规则前置
+  - GEOSITE,openai,🤖 ChatGPT
+  - GEOSITE,category-ai-!cn,🤖 AI服务
+
+  # 在国内可用的游戏直连 / 下载直连 / BT
+  - GEOSITE,category-games@cn,🎯 全球直连
+  - GEOSITE,category-game-platforms-download,🎯 全球直连
+  - GEOSITE,category-public-tracker,🎯 全球直连
+
+  # 海外通讯 / 社交 / 常用服务
+  - GEOSITE,category-communication,💬 即时通讯
+  - GEOSITE,category-social-media-!cn,🌐 社交媒体
+  - GEOSITE,github,🚀 GitHub
+  - GEOSITE,category-speedtest,🚀 测速工具
+  - GEOSITE,steam,🎮 Steam
+  - GEOSITE,youtube,📹 YouTube
+  - GEOSITE,apple-tvplus,🎥 AppleTV+
+  - GEOSITE,apple,🍎 苹果服务
+  - GEOSITE,microsoft,Ⓜ️ 微软服务
+  - GEOSITE,googlefcm,📢 谷歌FCM
+  - GEOSITE,google,🇬 谷歌服务
+  - GEOSITE,tiktok,🎶 TikTok
+
+  # 影音流媒体
+  - GEOSITE,netflix,🎬 国外主流视频
+  - GEOSITE,disney,🎬 国外主流视频
+  - GEOSITE,hbo,🎬 国外主流视频
+  - GEOSITE,primevideo,🎬 国外主流视频
+  - GEOSITE,spotify,🎻 Spotify
+  - GEOSITE,bahamut,📺 Bahamut
+
+  # 分类媒体与游戏
+  - GEOSITE,category-games,🎮 游戏平台
+  - GEOSITE,category-entertainment,🌎 国外媒体
+
+  # ==========================================================
+  # 🛒 独立跨境电商运营（置顶截流，优先于通用电商与 GFW 组）
+  # ==========================================================
+  # 1. 虾皮全家桶
+  - GEOSITE,shopee,🟠 虾皮电商
+  - DOMAIN-SUFFIX,shopee.com,🟠 虾皮电商
+  - DOMAIN-SUFFIX,shopee.ph,🟠 虾皮电商
+  - DOMAIN-SUFFIX,shopee.my,🟠 虾皮电商
+  - DOMAIN-SUFFIX,shopee.sg,🟠 虾皮电商
+  - DOMAIN-SUFFIX,shopeesz.com,🟠 虾皮电商
+
+  # 2. 亚马逊全家桶
+  - GEOSITE,amazon,📦 Amazon
+  - DOMAIN-SUFFIX,amazon.com,📦 Amazon
+  - DOMAIN-SUFFIX,sellercentral.amazon.com,📦 Amazon
+  - DOMAIN-SUFFIX,media-amazon.com,📦 Amazon
+  - DOMAIN-SUFFIX,ssl-images-amazon.com,📦 Amazon
+
+  # 3. 通用境外电商
+  - GEOSITE,category-ecommerce,🛒 国外电商
+
+  # ==========================================================
+  # 🏦 专属金融与电子钱包（全链路同节点收敛）
+  # ==========================================================
+  # 1. 纯国区贝宝 .cn 专属（仅保留 .cn 直连）
+  - DOMAIN,www.paypal.cn,🎯 全球直连
+  - DOMAIN-SUFFIX,paypal.cn,🎯 全球直连
+
+  # 2. PayPal 国际版完整链路
+  - DOMAIN-SUFFIX,paypal.com,🏦 金融银行
+  - DOMAIN-SUFFIX,paypalobjects.com,🏦 金融银行
+  - DOMAIN-SUFFIX,paypal-mktg.com,🏦 金融银行
+  - DOMAIN-SUFFIX,paypal-corp.com,🏦 金融银行
+  - DOMAIN-SUFFIX,paypal-communication.com,🏦 金融银行
+  - DOMAIN-KEYWORD,paypal,🏦 金融银行
+
+  # 3. Wise (TransferWise) 完整链路
+  - DOMAIN-SUFFIX,wise.com,🏦 金融银行
+  - DOMAIN-SUFFIX,transferwise.com,🏦 金融银行
+  - DOMAIN-SUFFIX,wise-assets.com,🏦 金融银行
+  - DOMAIN-SUFFIX,prjts.com,🏦 金融银行
+
+  # GFW 规则兜底代理
+  - GEOSITE,gfw,🚀 手动选择
+
+  # GEOIP 精准分流
+  - GEOIP,telegram,💬 即时通讯,no-resolve
+  - GEOIP,twitter,🌐 社交媒体,no-resolve
+  - GEOIP,facebook,🌐 社交媒体,no-resolve
+  - GEOIP,google,🇬 谷歌服务,no-resolve
+  - GEOIP,netflix,🎬 国外主流视频,no-resolve
+
+  # 大陆白名单兜底直连
+  - GEOSITE,cn,🎯 全球直连
+  - GEOIP,CN,🎯 全球直连,no-resolve
+
+  # 漏网之鱼
+  - MATCH,🐟 漏网之鱼
