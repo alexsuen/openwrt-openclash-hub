@@ -1,9 +1,163 @@
+port: 7890
+socks-port: 7891
+redir-port: 7892
+allow-lan: true
+mode: rule
+log-level: info
+external-controller: 0.0.0.0:9090
+secret: ''
+
+# ==========================================
+# 1. 机场官方专线 DNS（完全原样保留）
+# ==========================================
+dns:
+  enable: true
+  ipv6: false
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+    - 119.29.29.29
+  nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+    - 119.29.29.29
+  nameserver-policy:
+    # ★ 广告域名直接拒绝解析（抢在 cn 直连前面拦截，避免返回真实 IP）
+    "geosite:category-ads-all": rcode://refused
+
+    # 1. 机场官方专线解析（保持不动）
+
+
+    # 2. 苹果生态直连（保持不动）
+    "geosite:apple": 223.5.5.5
+    "*.apple.com": 223.5.5.5
+    "*.icloud.com": 223.5.5.5
+    "*.itunes.apple.com": 223.5.5.5
+    "*.ls.apple.com": 223.5.5.5
+    "*.push.apple.com": 223.5.5.5
+
+    # 3. 大陆合规网站走国内 DNS（保持不动）
+    "geosite:cn": 223.5.5.5
+
+    # 4. 海外外网走加密通道（彻底杜绝明文 8.8.8.8 撞墙丢包）
+    #"geosite:geolocation-!cn": 8.8.8.8
+  fallback:
+    - 8.8.8.8
+    - 1.1.1.1
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
 
 # ==========================================
 # 2. 机场节点代理集（完全原样保留）
 # ==========================================
+proxy-providers:
+  Provider_53B372:
+    type: http
+    url: "填上你的机场"
+    interval: 3600
+    path: "./proxy_provider/Provider_53B372.yaml"
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com
+      interval: 300
 
+# ==========================================
+# 2.5 外部规则集声明 (Rule Providers - GitHub 云端订阅)
+# ==========================================
+rule-providers:
+  DIRECT:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/direct.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/direct.yaml"
+    interval: 86400
 
+  US-ONLY:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/us-only.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/us-only.yaml"
+    interval: 86400
+
+  BANK-PH:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/bank-ph.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/bank-ph.yaml"
+    interval: 86400
+
+  FINANCE-GLOBAL:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/finance-global.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/finance-global.yaml"
+    interval: 86400
+
+  SHOPEE:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/shopee.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/shopee.yaml"
+    interval: 86400
+
+  AMAZON:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/amazon.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/amazon.yaml"
+    interval: 86400
+
+  GAMES:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/games.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/games.yaml"
+    interval: 86400
+
+  MY-MEDIA:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/my-media.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/my-media.yaml"
+    interval: 86400
+
+  ASIA:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/asia.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/asia.yaml"
+    interval: 86400
+
+  MICROSOFT:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/microsoft.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/microsoft.yaml"
+    interval: 86400
+
+  APPLE:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/apple.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/apple.yaml"
+    interval: 86400
 # ==========================================
 # 3. 策略组（修复全部空悬与嵌套，直挂订阅落地）
 # ==========================================
@@ -821,7 +975,70 @@ proxy-groups:
 # 4. 分流规则（严密排序，确保前置截流）
 # ==========================================
 rules:
+  # ==========================================================
+  # ★ 核心 1：底层协议拦截与防断流（本地最高优先级，先命中先执行）
+  # ==========================================================
+  # 淘宝/天猫 UDP 443 强切 TCP（解决手机端刷商品、查看图片转圈与断流）
+  - AND,((DOMAIN-KEYWORD,taobao),(DST-PORT,443),(NETWORK,UDP)),REJECT
+  - AND,((DOMAIN-KEYWORD,alicdn),(DST-PORT,443),(NETWORK,UDP)),REJECT
+  - AND,((DOMAIN-KEYWORD,tmall),(DST-PORT,443),(NETWORK,UDP)),REJECT
+  # 京东后台调试日志上报拦截（减少无用后台请求）
+  - DOMAIN-SUFFIX,jddebug.com,REJECT
+  # 苹果 Spotlight 本地搜索分析与隐私上报拦截（提升搜索响应速度）
+  - DOMAIN-SUFFIX,smoot.apple.com,REJECT
 
+  # ==========================================================
+  # ★ 核心 2：系统长连接与 Wi-Fi Calling 核心端口（纯端口规则必须留本地）
+  # ==========================================================
+  # 苹果 APNs 消息推送 5223 端口直连（确保锁屏秒推通知、省电）
+  - DST-PORT,5223,🎯 全球直连
+  # 苹果机房原生 IP 段直连兜底（no-resolve 免二次 DNS 查询拖慢连接）
+  - IP-CIDR,17.0.0.0/8,🎯 全球直连,no-resolve
+  # 美国手机卡 Wi-Fi Calling IPsec 密钥交换与数据隧道（本地直连通道）
+  - DST-PORT,500,🎯 全球直连
+  - DST-PORT,4500,🎯 全球直连
+
+  # ==========================================================
+  # ★ 核心 3：零星特殊长连接与中继直达
+  # ==========================================================
+  # Windows 系统通知与推送通道（低延迟香港测速组，解决频繁掉线重试）
+  - DOMAIN-SUFFIX,wns.windows.com,⚡ 香港自动
+  # GitHub 加速镜像域名（拉回代理优选组，防止第三方规则误入直连撞墙）
+  - DOMAIN-SUFFIX,ghfast.top,♻️ 自动选择
+  # Apple 智能与私密转送（香港地区不可用，统一调度到南洋节点）
+  - DOMAIN-SUFFIX,apple-relay.apple.com,🌏 南洋节点
+  - DOMAIN-SUFFIX,apple-relay.cloudflare.com,🌏 南洋节点
+  - DOMAIN-KEYWORD,apple-intelligence,🌏 南洋节点
+
+  # ==========================================================
+  # ★ 核心 4：挂载 11 个 GitHub 外部规则集（精准调度至你原有的策略组）
+  # ==========================================================
+  # 1. 全球直连白名单（国内通道、微软系统更新、Steam下载CDN、Wi-Fi Calling鉴权、贝宝中国）
+  - RULE-SET,DIRECT,🎯 全球直连
+  # 2. 纯美区专属业务（Google Voice、海外卡官网、Copilot认证与Bing网关）
+  - RULE-SET,US-ONLY,🇺🇸 美国节点
+  # 3. 菲律宾金融专线（GCash与Mynt官方API，防止异地风控封号）
+  - RULE-SET,BANK-PH,🇵🇭 菲律宾节点
+  # 4. 国际金融与电子钱包（PayPal国际版、Wise全链路）
+  - RULE-SET,FINANCE-GLOBAL,🏦 金融银行
+  # 5. 虾皮电商全家桶（官方与各站点卖家后台）
+  - RULE-SET,SHOPEE,🟠 虾皮电商
+  # 6. 亚马逊运营中心（卖家中心与后台静态资源）
+  - RULE-SET,AMAZON,📦 Amazon
+  # 7. Steam 游戏平台（商店、社区与好友网络加速，解决 101/105/118 报错）
+  - RULE-SET,GAMES,🎮 Steam
+  # 8. 海外流媒体与特化影音（爱壹帆 IYF 切片 CDN 与鉴权站点）
+  - RULE-SET,MY-MEDIA,🇸🇬 新加坡节点
+  # 9. 亚洲大区加速源（Google APK CDN、Docker Hub 镜像、驱动与基础设施）
+  - RULE-SET,ASIA,🌏 亚洲地区
+  # 10. 微软办公全家桶（个人版 OneDrive 走代理防阻断、Office 登录与组件认证）
+  - RULE-SET,MICROSOFT,Ⓜ️ 微软服务
+  # 11. 苹果核心业务与账户（iCloud 同步、苹果官方账户服务，供面板灵活控制）
+  - RULE-SET,APPLE,🍎 苹果服务
+
+  # ==========================================================
+  # 下方为你原有的 GEOSITE / GEOIP 基础规则（原样不动）
+  # ==========================================================
   # 本地地址和域名直连
   - GEOSITE,private,🎯 全球直连
   - GEOIP,private,🎯 全球直连,no-resolve
@@ -861,47 +1078,8 @@ rules:
   - GEOSITE,category-games,🎮 游戏平台
   - GEOSITE,category-entertainment,🌎 国外媒体
 
-  # ==========================================================
-  # 🛒 独立跨境电商运营（置顶截流，优先于通用电商与 GFW 组）
-  # ==========================================================
-  # 1. 虾皮全家桶
-  - GEOSITE,shopee,🟠 虾皮电商
-  - DOMAIN-SUFFIX,shopee.com,🟠 虾皮电商
-  - DOMAIN-SUFFIX,shopee.ph,🟠 虾皮电商
-  - DOMAIN-SUFFIX,shopee.my,🟠 虾皮电商
-  - DOMAIN-SUFFIX,shopee.sg,🟠 虾皮电商
-  - DOMAIN-SUFFIX,shopeesz.com,🟠 虾皮电商
-
-  # 2. 亚马逊全家桶
-  - GEOSITE,amazon,📦 Amazon
-  - DOMAIN-SUFFIX,amazon.com,📦 Amazon
-  - DOMAIN-SUFFIX,sellercentral.amazon.com,📦 Amazon
-  - DOMAIN-SUFFIX,media-amazon.com,📦 Amazon
-  - DOMAIN-SUFFIX,ssl-images-amazon.com,📦 Amazon
-
-  # 3. 通用境外电商
+  # 通用境外电商兜底
   - GEOSITE,category-ecommerce,🛒 国外电商
-
-  # ==========================================================
-  # 🏦 专属金融与电子钱包（全链路同节点收敛）
-  # ==========================================================
-  # 1. 纯国区贝宝 .cn 专属（仅保留 .cn 直连）
-  - DOMAIN,www.paypal.cn,🎯 全球直连
-  - DOMAIN-SUFFIX,paypal.cn,🎯 全球直连
-
-  # 2. PayPal 国际版完整链路
-  - DOMAIN-SUFFIX,paypal.com,🏦 金融银行
-  - DOMAIN-SUFFIX,paypalobjects.com,🏦 金融银行
-  - DOMAIN-SUFFIX,paypal-mktg.com,🏦 金融银行
-  - DOMAIN-SUFFIX,paypal-corp.com,🏦 金融银行
-  - DOMAIN-SUFFIX,paypal-communication.com,🏦 金融银行
-  - DOMAIN-KEYWORD,paypal,🏦 金融银行
-
-  # 3. Wise (TransferWise) 完整链路
-  - DOMAIN-SUFFIX,wise.com,🏦 金融银行
-  - DOMAIN-SUFFIX,transferwise.com,🏦 金融银行
-  - DOMAIN-SUFFIX,wise-assets.com,🏦 金融银行
-  - DOMAIN-SUFFIX,prjts.com,🏦 金融银行
 
   # GFW 规则兜底代理
   - GEOSITE,gfw,🚀 手动选择
