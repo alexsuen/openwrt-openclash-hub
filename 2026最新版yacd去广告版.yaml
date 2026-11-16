@@ -103,6 +103,14 @@ rule-providers:
     url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/finance-global.yaml"
     interval: 86400
 
+  BROKERS:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./rule_provider/brokers.yaml
+    url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/brokers.yaml"
+    interval: 86400
+
   SHOPEE:
     type: http
     behavior: classical
@@ -158,6 +166,7 @@ rule-providers:
     path: ./rule_provider/apple.yaml
     url: "https://cdn.jsdelivr.net/gh/alexsuen/openclash-rules@main/apple.yaml"
     interval: 86400
+
 # ==========================================
 # 3. 策略组（修复全部空悬与嵌套，直挂订阅落地）
 # ==========================================
@@ -470,6 +479,16 @@ proxy-groups:
       - ⚡ 菲律宾自动
       - ⚡ 英国自动
       - ⚡ 日本自动
+
+  - name: 📈 海外券商
+    type: select
+    proxies:
+      - 🇸🇬 新加坡节点
+      - 🇺🇸 美国节点
+      - 🇭🇰 香港节点
+      - 🌏 南洋节点
+      - 🚀 手动选择
+      - 🎯 全球直连
 
   - name: 📢 谷歌FCM
     type: select
@@ -1011,7 +1030,7 @@ rules:
   - DOMAIN-KEYWORD,apple-intelligence,🌏 南洋节点
 
   # ==========================================================
-  # ★ 核心 4：挂载 11 个 GitHub 外部规则集（精准调度至你原有的策略组）
+  # ★ 核心 4：挂载 12 个 GitHub 外部规则集（精准调度至你原有的策略组）
   # ==========================================================
   # 1. 全球直连白名单（国内通道、微软系统更新、Steam下载CDN、Wi-Fi Calling鉴权、贝宝中国）
   - RULE-SET,DIRECT,🎯 全球直连
@@ -1021,19 +1040,21 @@ rules:
   - RULE-SET,BANK-PH,🇵🇭 菲律宾节点
   # 4. 国际金融与电子钱包（PayPal国际版、Wise全链路）
   - RULE-SET,FINANCE-GLOBAL,🏦 金融银行
-  # 5. 虾皮电商全家桶（官方与各站点卖家后台）
+  # 5. 美港新海外券商（Moomoo、长桥、IBKR、嘉信、富达等独立隔离防风控）
+  - RULE-SET,BROKERS,📈 海外券商
+  # 6. 虾皮电商全家桶（官方与各站点卖家后台）
   - RULE-SET,SHOPEE,🟠 虾皮电商
-  # 6. 亚马逊运营中心（卖家中心与后台静态资源）
+  # 7. 亚马逊运营中心（卖家中心与后台静态资源）
   - RULE-SET,AMAZON,📦 Amazon
-  # 7. Steam 游戏平台（商店、社区与好友网络加速，解决 101/105/118 报错）
+  # 8. Steam 游戏平台（商店、社区与好友网络加速，解决 101/105/118 报错）
   - RULE-SET,GAMES,🎮 Steam
-  # 8. 海外流媒体与特化影音（爱壹帆 IYF 切片 CDN 与鉴权站点）
+  # 9. 海外流媒体与特化影音（爱壹帆 IYF 切片 CDN 与鉴权站点）
   - RULE-SET,MY-MEDIA,🇸🇬 新加坡节点
-  # 9. 亚洲大区加速源（Google APK CDN、Docker Hub 镜像、驱动与基础设施）
+  # 10. 亚洲大区加速源（Google APK CDN、Docker Hub 镜像、驱动与基础设施）
   - RULE-SET,ASIA,🌏 亚洲地区
-  # 10. 微软办公全家桶（个人版 OneDrive 走代理防阻断、Office 登录与组件认证）
+  # 11. 微软办公全家桶（个人版 OneDrive 走代理防阻断、Office 登录与组件认证）
   - RULE-SET,MICROSOFT,Ⓜ️ 微软服务
-  # 11. 苹果核心业务与账户（iCloud 同步、苹果官方账户服务，供面板灵活控制）
+  # 12. 苹果核心业务与账户（iCloud 同步、苹果官方账户服务，供面板灵活控制）
   - RULE-SET,APPLE,🍎 苹果服务
 
   # ==========================================================
