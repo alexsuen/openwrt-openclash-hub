@@ -29,7 +29,7 @@ dns:
     "geosite:category-ads-all": rcode://refused
 
     # 1. 机场官方专线解析（保持不动）
-
+        填上你自己机场的加密信息
 
     # 2. 苹果生态直连（保持不动）
     "geosite:apple": 223.5.5.5
@@ -61,7 +61,7 @@ proxy-providers:
     type: http
     url: "填上你的机场"
     interval: 3600
-    path: "./proxy_provider/Provider_53B372.yaml"
+    path: "./proxy_provider/Provider_53B372.yaml"（改成你机场生成的YAML）
     health-check:
       enable: true
       url: http://cp.cloudflare.com
