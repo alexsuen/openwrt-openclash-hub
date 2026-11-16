@@ -54,20 +54,6 @@ dns:
       - 240.0.0.0/4
 
 # ==========================================
-# 2. 机场节点代理集（完全原样保留）
-# ==========================================
-proxy-providers:
-  Provider_53B372:
-    type: http
-    url: "填上你的机场"
-    interval: 3600
-    path: "./proxy_provider/Provider_53B372.yaml"（改成你机场生成的YAML）
-    health-check:
-      enable: true
-      url: http://cp.cloudflare.com
-      interval: 300
-
-# ==========================================
 # 2.5 外部规则集声明 (Rule Providers - GitHub 云端订阅)
 # ==========================================
 rule-providers:
@@ -342,7 +328,7 @@ proxy-groups:
       - 🌎 美洲地区
       - 🎯 全球直连
 
-  - name: 🎬 国外主流视频
+  - name: 🎬 流媒体平台
     type: select
     proxies:
       - 🌏 南洋节点
@@ -1088,10 +1074,10 @@ rules:
   - GEOSITE,tiktok,🎶 TikTok
 
   # 影音流媒体
-  - GEOSITE,netflix,🎬 国外主流视频
-  - GEOSITE,disney,🎬 国外主流视频
-  - GEOSITE,hbo,🎬 国外主流视频
-  - GEOSITE,primevideo,🎬 国外主流视频
+  - GEOSITE,netflix,🎬 流媒体平台
+  - GEOSITE,disney,🎬 流媒体平台
+  - GEOSITE,hbo,🎬 流媒体平台
+  - GEOSITE,primevideo,🎬 流媒体平台
   - GEOSITE,spotify,🎻 Spotify
   - GEOSITE,bahamut,📺 Bahamut
 
@@ -1110,7 +1096,7 @@ rules:
   - GEOIP,twitter,🌐 社交媒体,no-resolve
   - GEOIP,facebook,🌐 社交媒体,no-resolve
   - GEOIP,google,🇬 谷歌服务,no-resolve
-  - GEOIP,netflix,🎬 国外主流视频,no-resolve
+  - GEOIP,netflix,🎬 流媒体平台,no-resolve
 
   # 大陆白名单兜底直连
   - GEOSITE,cn,🎯 全球直连
